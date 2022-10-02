@@ -1,0 +1,90 @@
+[
+    {
+      "ID": 188449,
+      "DateTime": "2018-12-02",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 2.9,
+      "Conductance": 386,
+      "Dissolved_oxygen": 12.5,
+      "PH": 8.2,
+      "Turbidity": 38.5
+    },
+    {
+      "ID": 188450,
+      "DateTime": "2018-12-03",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 2.3,
+      "Conductance": 367,
+      "Dissolved_oxygen": 12.6,
+      "PH": 8.1,
+      "Turbidity": 34.9
+    },
+    {
+      "ID": 188451,
+      "DateTime": "2018-12-04",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 1,
+      "Conductance": 374,
+      "Dissolved_oxygen": 13.3,
+      "PH": 8.2,
+      "Turbidity": 15.5
+    },
+    {
+      "ID": 188452,
+      "DateTime": "2018-12-05",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 1.2,
+      "Conductance": 388,
+      "Dissolved_oxygen": 13.4,
+      "PH": 8.2,
+      "Turbidity": 10.1
+    },
+    {
+      "ID": 188453,
+      "DateTime": "2018-12-06",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 1.2,
+      "Conductance": 398,
+      "Dissolved_oxygen": 13.5,
+      "PH": 8.2,
+      "Turbidity": 8.2
+    },
+    {
+      "ID": 188454,
+      "DateTime": "2018-12-07",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 0.6,
+      "Conductance": 405,
+      "Dissolved_oxygen": 13.9,
+      "PH": 8.3,
+      "Turbidity": 6.7
+    },
+    {
+      "ID": 188455,
+      "DateTime": "2018-12-08",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 0,
+      "Conductance": 413,
+      "Dissolved_oxygen": 14.2,
+      "PH": 8.3,
+      "Turbidity": 6
+    },
+    {
+      "ID": 188456,
+      "DateTime": "2018-12-09",
+      "Latitude": 44.0725203,
+      "Longitude": -84.0199939,
+      "Temperature": 0,
+      "Conductance": 422,
+      "Dissolved_oxygen": 14.2,
+      "PH": 8.3,
+      "Turbidity": 5.4
+    }
+]
