@@ -63,7 +63,7 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
             names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars)]
     # Combine
     print("Cols")
-    print(cols.columns)
+    print(cols)
     print("Names")
     print(names)
     agg = concat(cols, axis=1)
@@ -95,10 +95,6 @@ def loadDataFrame():
     global requestMonth
     global requestDay
 
-    # TODO: parameters --> url --> load resulting data from USGS url to tsv --> pandas df
-    # TODO: make JSON file for frontend
-    # TODO: if multiple sites in bounding box, take average of their column values for each datetime
-
     # Load dataset
     dataset = pd.read_csv("trainingData.json")
     # datetime
@@ -113,22 +109,10 @@ def loadDataFrame():
     dataset['Dissolved_oxygen'] = pd.to_numeric(dataset['Dissolved_oxygen'])
     dataset['PH'] = pd.to_numeric(dataset['PH'])
     dataset['Turbidity'] = pd.to_numeric(dataset['Turbidity'])
-
+    
+    dataset = dataset.drop("Site", axis=1)
     dataset = dataset.drop("Latitude", axis=1)
     dataset = dataset.drop("Longitude", axis=1)
-
-    # idk what's going on here?????
-    # Add columns for water quality metrics +7 days into future (repeat for +14, +21, +28)
-    # Original dataset has 96 rows of data per day
-    # shiftN = 30 if (scope == "30day") else (365 if (scope == "year") else 7)
-    # df_validation = dataset.tail(shiftN * 96).copy()
-
-    # dataset["Gage_height_shift"] = (dataset.copy())["Gage_height"]
-    # dataset["Gage_height_shift"] = dataset.Gage_height_shift.shift(
-    #     -shiftN * 96)
-
-    # last_date = pd.to_datetime(
-    #     dataset['datetime'].dt.date.iloc[-1], errors='coerce')
 
     # Replace all NaNs with value from previous row, the exception being Gage_height;
     # Only consider rows with valid Gage_height values
@@ -156,19 +140,6 @@ def loadDataFrame():
     values = dataset.copy().drop('DateTime', axis=1).values
     print("Relevant Columns:")
     print(dataset.columns)
-
-    # Specify columns to plot
-    # groups = [i for i in range(len(values) - 1)]
-    # i = 1
-    # # Plot each column
-    # pyplot.figure()
-    # for group in groups:
-    #     if (group < len(values)):
-    #         pyplot.subplot(len(groups), 1, i)
-    #         pyplot.plot(values[:, group])
-    #         pyplot.title(dataset.columns[group], y=0.5, loc='right')
-    #         i += 1
-    # pyplot.show()
     
     print("Values:")
     print(values)
@@ -179,7 +150,7 @@ def loadDataFrame():
     scaled = scaler.fit_transform(values)
 
     # frame as supervised learning
-    reframed = series_to_supervised(scaled, 1, predIntervalLength)
+    reframed = series_to_supervised(scaled, 1, 1)
     print(reframed.head())
 
     # Repeat for validation data
@@ -188,7 +159,7 @@ def loadDataFrame():
     validation_vals = df_validation_relevant.values
     validation_vals = validation_vals.astype('float32')
     validation_scaled = scaler.fit_transform(validation_vals)
-    validation_reframed = series_to_supervised(validation_scaled, 1, predIntervalLength)
+    validation_reframed = series_to_supervised(validation_scaled, 1, 1)
 
     makePredictions(dataset, reframed, validation_reframed, df_validation)
 
@@ -213,7 +184,7 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
     conductance_labels = ['150% Mean', 'Mean Conductance', '50% Mean', '25% Mean']
 
     df_validation.append(pd.Series(), ignore_index=True)
-    # Set last row to mean?
+    # Set last row to mean
     # df_validation.iloc[-1, df_validation.columns.get_loc('Conductance')] = mean_conduct_valid
 
     print("VALIDATION MIN AND MAX")
@@ -229,8 +200,8 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
     print(reframed.columns)
     values = reframed.values
     n_train_hours = math.floor(len(dataset.index) * 0.7)
-    train = values[:n_train_hours, :]
-    test = values[n_train_hours:, :]
+    train = values[n_train_hours:, :]
+    test = values[:n_train_hours, :]
 
     # Split into input and outputs
     train_X, train_y = train[:, :-1], train[:, -1]
