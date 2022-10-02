@@ -1,0 +1,62 @@
+.HeaderBox {
+    font-size: 50px;
+    padding-top: 1vh;
+    padding-bottom: 3vh;
+    padding-left: 1%;
+    border-bottom: 1px black solid;
+    height: 8vh;
+    background-color: #0269A4;
+    color: white;
+    font-family: 'Titan One';
+}
+
+.AppContainer {
+    display: flex; 
+}
+
+.SearchContainer {
+    width: 20%;
+    float: left;
+    height:88vh;
+    background-color: aliceblue;
+}
+
+.SearchBarContainer {
+    display: flex;
+    margin-top: 7.5%;
+}
+
+.SearchBar {
+    float: left;
+    width: 70%;
+    margin-left:5%;
+}
+
+
+.MapContainer {
+    width: 80%;
+    float: left;
+    height: 88vh;
+    background-color: aqua;
+    overflow: hidden;
+}
+
+
+.SubmitSearch {
+    width: 15%;
+    float: left;
+}
+
+.Alert {
+    color: red;
+    text-align: center;
+    font-size: 20px;
+}
+
+.drop {
+    width: 30px;
+    margin:0%;
+    transform: translate(0px,15px);
+    padding:0%;
+}
+
