@@ -28,14 +28,14 @@ from keras.layers import LSTM
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from getJson import getData
+# from getJson import getData
 
 userLatitude = 0.0
 userLongitude = 0.0
 requestYear = 2022
 requestMonth = 5
 requestDay = 1
-predIntervalLength = 30
+predIntervalLength = 365
 
 fig_test = Figure()
 fig_valid = Figure()
@@ -46,7 +46,7 @@ toReturn = []
 
 
 # Convert series to supervised learning
-def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
+def series_to_supervised(data, n_in=4, n_out=1, dropnan=True):
     n_vars = 1 if type(data) is list else data.shape[1]
     df = DataFrame(data)
     cols, names = list(), list()
@@ -62,10 +62,6 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
         else:
             names += [('var%d(t+%d)' % (j+1, i)) for j in range(n_vars)]
     # Combine
-    print("Cols")
-    print(cols)
-    print("Names")
-    print(names)
     agg = concat(cols, axis=1)
     agg.columns = names
     # Drop rows with NaN values
@@ -74,18 +70,21 @@ def series_to_supervised(data, n_in=1, n_out=1, dropnan=True):
     agg
     return agg
 
-def init(latitude, longitude, year, month, day):
+def init(latitude, longitude, year, month, day, predictionInterval):
     global userLatitude
     global userLongitude
     global requestYear
     global requestMonth
     global requestDay
+    global predIntervalLength
 
     userLatitude = latitude
     userLongitude = longitude
     requestYear = year
     requestMonth = month
     requestDay = day
+    predIntervalLength = predictionInterval
+
     loadDataFrame()
 
 def loadDataFrame():
@@ -169,7 +168,7 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
     scaler = MinMaxScaler(feature_range=(0, 1))
 
     min_conduct = dataset['Conductance'].min()
-    mean_conduct = dataset['Conductance'].mean()
+    mean_conduct = dataset[dataset['Conductance'] > 0]['Conductance'].mean()
     max_conduct = dataset['Conductance'].max()
 
     df_conductance_levels = pd.DataFrame(
@@ -184,16 +183,17 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
     conductance_labels = ['150% Mean', 'Mean Conductance', '50% Mean', '25% Mean']
 
     df_validation.append(pd.Series(), ignore_index=True)
-    # Set last row to mean
-    # df_validation.iloc[-1, df_validation.columns.get_loc('Conductance')] = mean_conduct_valid
 
     print("VALIDATION MIN AND MAX")
     min_conduct_valid = df_validation['Conductance'].min()
     print(min_conduct_valid)
-    mean_conduct_valid = df_validation['Conductance'].mean()
+    mean_conduct_valid = df_validation[df_validation['Conductance'] > 0]['Conductance'].mean()
     print(mean_conduct_valid)
     max_conduct_valid = df_validation['Conductance'].max()
     print(max_conduct_valid)
+
+    # Set last row to mean
+    # df_validation.iloc[-1, df_validation.columns.get_loc('Conductance')] = mean_conduct_valid
 
     # Split into train and test sets
     print("REFRAMED COLUMNS:")
@@ -218,33 +218,33 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
 
     # Design network
     model = Sequential()
-    model.add(LSTM(50, input_shape=(train_X.shape[1], train_X.shape[2])))
+    model.add(LSTM(100, input_shape=(train_X.shape[1], train_X.shape[2])))
     model.add(Dense(1, activation=keras.activations.sigmoid))
     model.compile(loss='mae', optimizer='rmsprop', metrics=['mse', 'mae'])
     # Fit network
-    history = model.fit(train_X, train_y, epochs=55, batch_size=100, validation_data=(test_X, test_y), verbose=2,  shuffle=False)  # validation_split= 0.2)
+    history = model.fit(train_X, train_y, epochs=100, batch_size=100, validation_data=(test_X, test_y), verbose=2,  shuffle=False)  # validation_split= 0.2)
 
     # Plot history
-    pyplot.plot(history.history['loss'], label='train')
-    pyplot.plot(history.history['val_loss'], label='validation')
+    pyplot.plot(history.history['loss'], label='train_loss')
+    pyplot.plot(history.history['val_loss'], label='validation_loss')
     pyplot.legend()
     pyplot.show()
 
     # Make a prediction and plot results
-    print("TEST_X")
-    print(test_X.shape)
+    # print("TEST_X")
+    # print(test_X.shape)
     yhat_test = model.predict(test_X)
-    print("YHAT_TEST")
-    print(yhat_test)
+    # print("YHAT_TEST")
+    # print(yhat_test)
 
-    pyplot.plot(test_y, label='test_y')
-    pyplot.plot(yhat_test, label='yhat_test')
-    for condLevelIndex in range(len(conductance_levels_scaled)):
-        pyplot.axhline(y=conductance_levels_scaled[condLevelIndex], color=conductance_colors[condLevelIndex],
-                       linestyle='-', label=conductance_labels[condLevelIndex])
-    pyplot.legend()
-    pyplot.savefig("test.png")
-    pyplot.show()
+    # pyplot.plot(test_y, label='test_y')
+    # pyplot.plot(yhat_test, label='yhat_test')
+    # for condLevelIndex in range(len(conductance_levels_scaled)):
+    #     pyplot.axhline(y=conductance_levels_scaled[condLevelIndex], color=conductance_colors[condLevelIndex],
+    #                    linestyle='-', label=conductance_labels[condLevelIndex])
+    # pyplot.legend()
+    # pyplot.savefig("test.png")
+    # pyplot.show()
 
     # Plot and evaluate prediction results
     axis_test = fig_test.add_subplot(1, 1, 1)
@@ -289,7 +289,6 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
         resultsYvalid = []
 
         while (i < len(yhat_valid)-4):
-            resultsRow = []
             max_yhat_valid = max(max(yhat_valid[i][0], yhat_valid[i+1][0]), max(yhat_valid[i+2][0], yhat_valid[i+3][0]))
             max_y_validation = max(max(y_validation[i], y_validation[i+1]), max(y_validation[i+2], y_validation[i+3]))
 
@@ -331,4 +330,4 @@ def makePredictions(dataset, reframed, validation_reframed, df_validation):
     print('Test RMSE: %.3f' % rmse)
 
 
-init(0.0, 0.0, 2022, 5, 1)
+# init(0.0, 0.0, 2022, 5, 1)
